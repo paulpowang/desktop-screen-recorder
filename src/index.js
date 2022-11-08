@@ -1,10 +1,34 @@
-const { app, BrowserWindow } = require('electron');
+const { app, BrowserWindow, Menu } = require('electron');
 const path = require('path');
+const { ipcMain, desktopCapturer,  } = require('electron')
 
 // Handle creating/removing shortcuts on Windows when installing/uninstalling.
 if (require('electron-squirrel-startup')) {
   app.quit();
 }
+
+ipcMain.handle(
+  'DESKTOP_CAPTURER_GET_SOURCES',
+  (event, opts) => desktopCapturer.getSources(opts)
+)
+let tempMenu = new Menu();
+ipcMain.handle(
+  'Menu-test', (event,template)=>{
+   tempMenu= Menu.buildFromTemplate(template)
+  }
+)
+ipcMain.handle(
+  "Menu-popup", (e, test)=>console.log(tempMenu.popup())
+)
+// ipcMain.handle("create-stream", async(e,constraints,videoElement)=>{
+//   console.log(constraints, videoElement)
+//   // Create a Stream
+//   const stream = await Navigator.mediaDevices.getUserMedia(constraints)
+    
+//   // Preview the source in a video element
+//   videoElement.srcObject = stream;
+//   videoElement.play();
+// })
 
 const createWindow = () => {
   // Create the browser window.
@@ -13,6 +37,7 @@ const createWindow = () => {
     height: 600,
     webPreferences: {
       preload: path.join(__dirname, 'preload.js'),
+      nodeIntegration:true,contextIsolation: false,enableRemoteModule: true
     },
   });
 
@@ -47,3 +72,5 @@ app.on('activate', () => {
 
 // In this file you can include the rest of your app's specific main process
 // code. You can also put them in separate files and import them here.
+
+
